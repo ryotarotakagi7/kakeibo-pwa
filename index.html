@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -68,11 +68,12 @@
   .nav {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: 64px;
+    height: calc(64px + env(safe-area-inset-bottom));
     background: var(--surface);
     border-top: 1px solid var(--border);
     display: flex;
     z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
   }
   .nav-btn {
     flex: 1;
@@ -93,7 +94,7 @@
 
   /* ===== メインコンテンツ ===== */
   .main {
-    padding: 76px 16px 80px;
+    padding: 76px 16px calc(80px + env(safe-area-inset-bottom));
   }
 
   /* ===== ページ ===== */
