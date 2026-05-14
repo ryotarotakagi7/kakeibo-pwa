@@ -452,7 +452,7 @@ async function analyzeReceipt() {
 
   try {
     const res = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + settings.geminiKey,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + settings.geminiKey,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -496,7 +496,7 @@ function renderResults() {
         <div class="item-name">${item.name || item.store || '不明'}</div>
         <div class="item-amount">¥${Number(item.amount).toLocaleString()}</div>
       </div>
-      <div class="item-cats">${item.large || '?'} › ${item.middle || '?'} ${item.date ? '・' + item.date : ''}</div>
+      <div class="item-cats">${item.large || '?'} › ${item.middle || '?'} ${item.date ? '・' + formatDate(item.date) : ''}</div>
     </div>`;
   }).join('');
   document.getElementById('result-total').textContent = '¥' + total.toLocaleString();
@@ -607,7 +607,7 @@ async function loadHistory() {
         </div>
         <div class="history-right">
           <div class="history-amount">¥${Number(item.amount).toLocaleString()}</div>
-          <div class="history-date">${item.date}</div>
+          <div class="history-date">${formatDate(item.date)}</div>
         </div>
       </div>
     `).join('');
@@ -657,6 +657,26 @@ function resetCapture() {
   const zone = document.getElementById('capture-zone');
   zone.classList.remove('has-image');
   zone.innerHTML = '<div class="icon">📷</div><div>タップしてレシートを撮影</div><div style="font-size:12px;margin-top:6px">または画像を選択</div>';
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  // ISO形式（2026-02-15T15:00:00.000Z）の場合は日付部分を取り出す
+  if (typeof d === 'string') {
+    // YYYY-MM-DD形式が含まれていればそれを取る
+    const m = d.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return m[1] + '/' + m[2] + '/' + m[3];
+    // YYYY/MM/DD形式ならそのまま
+    if (d.match(/^\d{4}\/\d{2}\/\d{2}/)) return d.substring(0,10);
+    return d;
+  }
+  // Dateオブジェクトの場合
+  try {
+    const dt = new Date(d);
+    return dt.getFullYear() + '/' + String(dt.getMonth()+1).padStart(2,'0') + '/' + String(dt.getDate()).padStart(2,'0');
+  } catch(e) {
+    return String(d);
+  }
 }
 
 function showToast(msg, type) {
