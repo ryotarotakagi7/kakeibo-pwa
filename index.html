@@ -36,12 +36,8 @@
 
   /* ===== ヘッダー ===== */
   .header {
-    position: fixed;
-    top: 0; left: 0; right: 0;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    z-index: 100;
-    padding-top: env(safe-area-inset-top);
   }
   .header-inner {
     height: 56px;
@@ -96,7 +92,7 @@
 
   /* ===== メインコンテンツ ===== */
   .main {
-    padding: 16px 16px 24px;
+    padding: 16px;
   }
 
   /* ===== ページ ===== */
@@ -594,16 +590,6 @@ let currentImageBase64 = '';
 // 初期化
 // ============================================================
 window.addEventListener('load', () => {
-  // ヘッダーの高さに合わせてmainのtop paddingを調整
-  function adjustLayout() {
-    const header = document.querySelector('.header');
-    const main = document.querySelector('.main');
-    if (header && main) {
-      main.style.paddingTop = (header.offsetHeight + 8) + 'px';
-    }
-  }
-  adjustLayout();
-  window.addEventListener('resize', adjustLayout);
   loadSettings();
   loadCategories();
   updateSettingsUI();
