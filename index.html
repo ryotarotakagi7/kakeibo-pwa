@@ -721,7 +721,11 @@ async function analyzeReceipt() {
     );
 
     const data = await res.json();
+    console.log('API response:', JSON.stringify(data).substring(0,500));
+    if (data.error) throw new Error('Gemini APIエラー: ' + data.error.message);
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    console.log('text:', text.substring(0,200));
+    if (!text) throw new Error('応答テキストが空 / APIキー確認要');
 
     // JSON抽出（複数パターン対応）
     let jsonText = null;
