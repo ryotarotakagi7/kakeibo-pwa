@@ -2,597 +2,365 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="家計簿">
 <title>家計簿PWA</title>
 <style>
-  :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #222536;
-    --accent: #6ee7b7;
-    --accent2: #818cf8;
-    --danger: #f87171;
-    --warn: #fbbf24;
-    --text: #f1f5f9;
-    --text2: #94a3b8;
-    --border: #2e3347;
-    --radius: 16px;
-    --font: 'Hiragino Sans', 'Noto Sans JP', sans-serif;
-  }
-
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
+  html, body { background: #0f1117; color: #f1f5f9; font-family: 'Hiragino Sans', sans-serif; }
   body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font);
-    min-height: 100dvh;
-    overflow-x: hidden;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    min-height: 100vh;
   }
 
-  /* ===== ヘッダー ===== */
   .header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-  }
-  .header-inner {
-    height: 56px;
+    background: #1a1d27;
+    border-bottom: 1px solid #2e3347;
+    padding: 14px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
   }
-  .header-title {
+  .header h1 {
     font-size: 18px;
     font-weight: 700;
-    letter-spacing: 0.05em;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    background: linear-gradient(90deg, #6ee7b7, #818cf8);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-  .settings-btn {
+  .header button {
     background: none;
     border: none;
-    color: var(--text2);
     font-size: 22px;
+    color: #94a3b8;
     cursor: pointer;
-    padding: 8px;
+    padding: 4px 8px;
   }
 
-  /* ===== ナビ（上部タブ） ===== */
   .nav {
     display: flex;
-    border-top: 1px solid var(--border);
+    background: #1a1d27;
+    border-bottom: 1px solid #2e3347;
   }
-  .nav-btn {
+  .nav button {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
-    color: var(--text2);
-    font-size: 10px;
+    color: #94a3b8;
+    padding: 12px 0;
+    font-size: 13px;
     cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
-    padding: 10px 0;
-    -webkit-appearance: none;
-    appearance: none;
-    touch-action: manipulation;
   }
-  .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .nav-btn svg { width: 20px; height: 20px; }
-
-  /* ===== メインコンテンツ ===== */
-  .main {
-    padding: 16px;
+  .nav button.active {
+    color: #6ee7b7;
+    border-bottom-color: #6ee7b7;
   }
 
-  /* ===== ページ ===== */
+  main { padding: 16px; }
   .page { display: none; }
   .page.active { display: block; }
 
-  /* ===== カード ===== */
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 16px;
+    background: #1a1d27;
+    border: 1px solid #2e3347;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 14px;
   }
   .card-title {
-    font-size: 13px;
-    color: var(--text2);
+    font-size: 12px;
+    color: #94a3b8;
     margin-bottom: 12px;
-    letter-spacing: 0.08em;
     text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
-  /* ===== 撮影ページ ===== */
-  .capture-zone {
-    background: var(--surface2);
-    border: 2px dashed var(--border);
-    border-radius: var(--radius);
-    min-height: 200px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
+  .capture {
+    background: #222536;
+    border: 2px dashed #2e3347;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
     cursor: pointer;
-    transition: border-color 0.2s;
-    overflow: hidden;
-    position: relative;
+    color: #94a3b8;
   }
-  .capture-zone:active { border-color: var(--accent); }
-  .capture-zone img {
-    width: 100%;
-    border-radius: calc(var(--radius) - 2px);
-    display: none;
-  }
-  .capture-zone.has-image img { display: block; }
-  .capture-zone.has-image .capture-placeholder { display: none; }
-  .capture-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    color: var(--text2);
-    font-size: 14px;
-  }
-  .capture-placeholder svg { width: 48px; height: 48px; opacity: 0.5; }
-
-  #file-input { display: none; }
+  .capture .icon { font-size: 48px; margin-bottom: 8px; }
+  .capture.has-image { padding: 8px; }
+  .capture img { width: 100%; border-radius: 8px; display: block; }
 
   .btn {
     width: 100%;
-    padding: 16px;
-    border-radius: var(--radius);
+    padding: 14px;
+    border-radius: 12px;
     border: none;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    letter-spacing: 0.05em;
+    margin-top: 10px;
   }
-  .btn:active { transform: scale(0.97); }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn-primary {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    background: linear-gradient(135deg, #6ee7b7, #818cf8);
     color: #0f1117;
-    margin-top: 12px;
   }
   .btn-outline {
     background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text);
-    margin-top: 8px;
+    border: 1px solid #2e3347;
+    color: #f1f5f9;
   }
-  .btn-danger {
-    background: var(--danger);
-    color: white;
-    margin-top: 8px;
+  .btn:disabled { opacity: 0.5; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 6px;
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    background: #222536;
+    border: 1px solid #2e3347;
+    border-radius: 10px;
+    padding: 12px;
+    color: #f1f5f9;
+    font-size: 14px;
+    font-family: inherit;
   }
 
-  /* ===== AI解析中 ===== */
-  .analyzing {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    padding: 32px 0;
+  .item {
+    background: #222536;
+    border: 1px solid #2e3347;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
   }
-  .analyzing.show { display: flex; }
+  .item-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .item-name { font-weight: 600; font-size: 14px; flex: 1; }
+  .item-amount { color: #6ee7b7; font-weight: 700; }
+  .item-cats { font-size: 11px; color: #94a3b8; }
+
+  .total {
+    background: rgba(110,231,183,0.1);
+    border: 1px solid #6ee7b7;
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0;
+  }
+  .total-label { color: #94a3b8; font-size: 13px; }
+  .total-amount { font-size: 22px; font-weight: 800; color: #6ee7b7; }
+
+  .history-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #2e3347;
+    display: flex;
+    justify-content: space-between;
+  }
+  .history-name { font-size: 14px; }
+  .history-cat { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  .history-right { text-align: right; }
+  .history-amount { color: #6ee7b7; font-weight: 700; font-size: 14px; }
+  .history-date { font-size: 10px; color: #94a3b8; }
+
+  .summary-month { font-size: 14px; color: #94a3b8; }
+  .summary-total {
+    font-size: 32px;
+    font-weight: 900;
+    background: linear-gradient(90deg, #6ee7b7, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 4px 0 16px;
+  }
+  .bar-item { margin-bottom: 12px; }
+  .bar-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  .bar-track {
+    height: 6px;
+    background: #222536;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6ee7b7, #818cf8);
+  }
+
+  .empty { text-align: center; color: #94a3b8; padding: 30px; font-size: 13px; }
   .spinner {
-    width: 48px;
-    height: 48px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
+    width: 40px;
+    height: 40px;
+    border: 3px solid #2e3347;
+    border-top-color: #6ee7b7;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
+    margin: 30px auto;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ===== 解析結果 ===== */
-  .result-area { display: none; }
-  .result-area.show { display: block; }
-
-  .result-item {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 10px;
-  }
-  .result-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 8px;
-  }
-  .result-item-name {
-    font-size: 15px;
-    font-weight: 600;
-    flex: 1;
-    margin-right: 12px;
-  }
-  .result-item-amount {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--accent);
-    white-space: nowrap;
-  }
-  .result-item-cats {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-  .cat-tag {
-    font-size: 11px;
-    padding: 3px 8px;
-    border-radius: 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text2);
-  }
-  .cat-tag.large { color: var(--accent2); border-color: var(--accent2); }
-
-  .result-total {
-    background: linear-gradient(135deg, rgba(110,231,183,0.1), rgba(129,140,248,0.1));
-    border: 1px solid var(--accent);
-    border-radius: 12px;
-    padding: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  .result-total-label { font-size: 14px; color: var(--text2); }
-  .result-total-amount { font-size: 24px; font-weight: 800; color: var(--accent); }
-
-  /* 編集モーダル */
-  .modal-overlay {
+  .modal {
     display: none;
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.7);
     z-index: 200;
     align-items: flex-end;
+    justify-content: center;
   }
-  .modal-overlay.show { display: flex; }
-  .modal {
-    background: var(--surface);
-    border-radius: var(--radius) var(--radius) 0 0;
-    padding: 24px 20px 40px;
+  .modal.show { display: flex; }
+  .modal-content {
+    background: #1a1d27;
     width: 100%;
-    max-height: 80dvh;
+    max-height: 85vh;
     overflow-y: auto;
-  }
-  .modal-title {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 20px;
-  }
-  .form-group { margin-bottom: 16px; }
-  .form-label {
-    font-size: 12px;
-    color: var(--text2);
-    margin-bottom: 6px;
-    display: block;
-  }
-  .form-input, .form-select {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    color: var(--text);
-    font-size: 15px;
-    font-family: var(--font);
-  }
-  .form-select { appearance: none; }
-
-  /* ===== 履歴ページ ===== */
-  .history-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .history-item:last-child { border-bottom: none; }
-  .history-left { flex: 1; }
-  .history-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-  .history-cat { font-size: 12px; color: var(--text2); }
-  .history-right { text-align: right; }
-  .history-amount { font-size: 16px; font-weight: 700; color: var(--accent); }
-  .history-date { font-size: 11px; color: var(--text2); margin-top: 2px; }
-
-  /* ===== 設定ページ ===== */
-  .setting-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .setting-row:last-child { border-bottom: none; }
-  .setting-label { font-size: 14px; }
-  .setting-value { font-size: 13px; color: var(--text2); max-width: 60%; text-align: right; word-break: break-all; }
-  .setting-input {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
-    color: var(--text);
-    font-size: 13px;
-    font-family: var(--font);
-    margin-top: 8px;
+    border-radius: 16px 16px 0 0;
+    padding: 20px 18px 30px;
   }
 
-  /* ===== トースト ===== */
   .toast {
     position: fixed;
-    bottom: 80px;
+    bottom: 30px;
     left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 12px 20px;
+    transform: translateX(-50%);
+    background: #222536;
+    border: 1px solid #2e3347;
+    border-radius: 12px;
+    padding: 12px 18px;
     font-size: 13px;
-    opacity: 0;
-    transition: all 0.3s;
-    z-index: 300;
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-width: 88vw;
+    max-width: 86vw;
     text-align: center;
     line-height: 1.5;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 300;
+    white-space: pre-line;
   }
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-  .toast.success { border-color: var(--accent); color: var(--accent); }
-  .toast.error { border-color: var(--danger); color: var(--danger); }
+  .toast.show { opacity: 1; }
+  .toast.error { border-color: #f87171; color: #f87171; }
+  .toast.success { border-color: #6ee7b7; color: #6ee7b7; }
 
-  /* ===== 月サマリー ===== */
-  .summary-month {
-    font-size: 22px;
-    font-weight: 800;
-    margin-bottom: 4px;
-  }
-  .summary-total {
-    font-size: 36px;
-    font-weight: 900;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 4px;
-  }
-  .summary-sub { font-size: 13px; color: var(--text2); }
-  .bar-item { margin-bottom: 14px; }
-  .bar-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    margin-bottom: 6px;
-  }
-  .bar-track {
-    height: 8px;
-    background: var(--surface2);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    transition: width 0.6s ease;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text2);
-    font-size: 14px;
-  }
+  #file-input { display: none; }
 </style>
 </head>
 <body>
 
-<!-- ヘッダー -->
 <header class="header">
-  <div class="header-inner">
-    <div class="header-title">💰 家計簿</div>
-    <button class="settings-btn" onclick="showPage('settings')">⚙️</button>
-  </div>
-  <!-- ナビ（上部タブ） -->
-  <nav class="nav">
-    <button class="nav-btn active" id="nav-capture" onclick="showPage('capture')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.618 2.25 8.555 2.25 9.75v9a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-9c0-1.195-.75-2.132-1.802-2.345a48.524 48.524 0 01-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/>
-        <path d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/>
-      </svg>
-      撮影
-    </button>
-    <button class="nav-btn" id="nav-history" onclick="showPage('history')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V19.5a2.25 2.25 0 002.25 2.25h.75"/>
-      </svg>
-      履歴
-    </button>
-    <button class="nav-btn" id="nav-summary" onclick="showPage('summary')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>
-      </svg>
-      集計
-    </button>
-  </nav>
+  <h1>💰 家計簿</h1>
+  <button onclick="showPage('settings')">⚙️</button>
 </header>
 
-<!-- メイン -->
-<main class="main">
+<nav class="nav">
+  <button class="active" id="tab-capture" onclick="showPage('capture')">📷 撮影</button>
+  <button id="tab-history" onclick="showPage('history')">📋 履歴</button>
+  <button id="tab-summary" onclick="showPage('summary')">📊 集計</button>
+</nav>
 
-  <!-- 撮影・入力ページ -->
+<main>
+
   <div class="page active" id="page-capture">
-
     <div class="card">
       <div class="card-title">📷 レシートを撮影</div>
-      <div class="capture-zone" id="capture-zone" onclick="document.getElementById('file-input').click()">
-        <div class="capture-placeholder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.618 2.25 8.555 2.25 9.75v9a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-9c0-1.195-.75-2.132-1.802-2.345a48.524 48.524 0 01-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/>
-            <path d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"/>
-          </svg>
-          <span>タップしてレシートを撮影</span>
-          <span style="font-size:12px">または画像を選択</span>
-        </div>
-        <img id="preview-img" src="" alt="プレビュー">
+      <div class="capture" id="capture-zone" onclick="document.getElementById('file-input').click()">
+        <div class="icon">📷</div>
+        <div>タップしてレシートを撮影</div>
+        <div style="font-size:12px;margin-top:6px">または画像を選択</div>
       </div>
-      <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImageSelect(event)">
-      <button class="btn btn-outline" onclick="document.getElementById('file-input').click()" style="margin-top:10px">
-        📁 ギャラリーから選ぶ
-      </button>
+      <input type="file" id="file-input" accept="image/*" onchange="handleImageSelect(event)">
+      <button class="btn btn-outline" onclick="openGallery()">📁 ギャラリーから選ぶ</button>
     </div>
 
-    <!-- AI解析中 -->
-    <div class="analyzing" id="analyzing">
+    <div id="analyzing" style="display:none">
       <div class="spinner"></div>
-      <div style="color:var(--text2);font-size:14px">AIがレシートを解析中...</div>
+      <div style="text-align:center;color:#94a3b8;font-size:13px">AIがレシートを解析中...</div>
     </div>
 
-    <!-- 解析結果 -->
-    <div class="result-area" id="result-area">
+    <div id="result-area" style="display:none">
       <div class="card">
         <div class="card-title">✅ 解析結果（タップして編集）</div>
         <div id="result-items"></div>
-        <div class="result-total">
-          <div class="result-total-label">レシート合計</div>
-          <div class="result-total-amount" id="result-total">¥0</div>
+        <div class="total">
+          <div class="total-label">レシート合計</div>
+          <div class="total-amount" id="result-total">¥0</div>
         </div>
         <button class="btn btn-primary" onclick="sendToSheets()">📊 スプレッドシートに送信</button>
         <button class="btn btn-outline" onclick="resetCapture()">🔄 撮り直す</button>
       </div>
     </div>
-
   </div>
 
-  <!-- 履歴ページ -->
   <div class="page" id="page-history">
     <div class="card">
       <div class="card-title">📋 直近の明細</div>
-      <div id="history-list"><div class="empty-state">読み込み中...</div></div>
+      <div id="history-list"><div class="empty">読み込み中...</div></div>
     </div>
   </div>
 
-  <!-- サマリーページ -->
   <div class="page" id="page-summary">
     <div class="card">
-      <div style="margin-bottom:16px">
-        <div class="summary-month" id="summary-month"></div>
-        <div class="summary-total" id="summary-total">¥0</div>
-        <div class="summary-sub">今月の支出合計</div>
-      </div>
+      <div class="summary-month" id="summary-month"></div>
+      <div class="summary-total" id="summary-total">¥0</div>
       <div id="summary-bars"></div>
     </div>
   </div>
 
-  <!-- 設定ページ -->
   <div class="page" id="page-settings">
     <div class="card">
       <div class="card-title">🔑 API設定</div>
       <div class="form-group">
-        <label class="form-label">Gemini API キー</label>
-        <input class="setting-input" type="password" id="gemini-key-input" placeholder="AIzaSy..." value="">
+        <label>Gemini API キー</label>
+        <input type="password" id="gemini-key" placeholder="AIzaSy...">
       </div>
       <div class="form-group">
-        <label class="form-label">Google Apps Script URL</label>
-        <input class="setting-input" type="text" id="gas-url-input" placeholder="https://script.google.com/..." value="">
+        <label>Google Apps Script URL</label>
+        <input type="text" id="gas-url" placeholder="https://script.google.com/...">
       </div>
       <button class="btn btn-primary" onclick="saveSettings()">💾 保存</button>
-    </div>
-    <div class="card">
-      <div class="card-title">ℹ️ アプリ情報</div>
-      <div class="setting-row">
-        <div class="setting-label">バージョン</div>
-        <div class="setting-value">1.0.0</div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-label">接続先シート</div>
-        <div class="setting-value" id="sheet-status">未設定</div>
-      </div>
     </div>
   </div>
 
 </main>
 
-
-
-<!-- 編集モーダル -->
-<div class="modal-overlay" id="edit-modal" onclick="closeModal(event)">
-  <div class="modal">
-    <div class="modal-title">✏️ 明細を編集</div>
+<div class="modal" id="edit-modal">
+  <div class="modal-content">
+    <h3 style="margin-bottom:16px;font-size:15px">✏️ 明細を編集</h3>
     <input type="hidden" id="edit-index">
-    <div class="form-group">
-      <label class="form-label">日付</label>
-      <input class="form-input" type="date" id="edit-date">
-    </div>
-    <div class="form-group">
-      <label class="form-label">品目・店名</label>
-      <input class="form-input" type="text" id="edit-name">
-    </div>
-    <div class="form-group">
-      <label class="form-label">費目カテゴリ（大）</label>
-      <select class="form-select" id="edit-large" onchange="updateMiddleOptions()"></select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">費目詳細（中）</label>
-      <select class="form-select" id="edit-middle"></select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">金額（円）</label>
-      <input class="form-input" type="number" id="edit-amount">
-    </div>
+    <div class="form-group"><label>日付</label><input type="date" id="edit-date"></div>
+    <div class="form-group"><label>品目・店名</label><input type="text" id="edit-name"></div>
+    <div class="form-group"><label>費目カテゴリ（大）</label><select id="edit-large" onchange="updateMiddle()"></select></div>
+    <div class="form-group"><label>費目詳細（中）</label><select id="edit-middle"></select></div>
+    <div class="form-group"><label>金額</label><input type="number" id="edit-amount"></div>
     <button class="btn btn-primary" onclick="saveEdit()">保存</button>
     <button class="btn btn-outline" onclick="closeModal()">キャンセル</button>
   </div>
 </div>
 
-<!-- トースト -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ============================================================
-// 設定
-// ============================================================
 const SETTINGS_KEY = 'kakeibo_settings';
-
-let settings = {
-  geminiKey: 'AIzaSyB0OV2geoX0PCemvS4i_cSf_bLkLWgTA78',
-  gasUrl: 'https://script.google.com/macros/s/AKfycbxPqYb88G3VlfJvPru119Hqs_ilaW01hVaH5clO9BYr5mx2V-_ZD8-zFmU8ym4x53IG/exec'
-};
-
-let categories = [];  // [{large, middle}]
-let parsedItems = []; // 解析結果
+let settings = { geminiKey: '', gasUrl: '' };
+let categories = [];
+let parsedItems = [];
 let currentImageBase64 = '';
 
-// ============================================================
-// 初期化
-// ============================================================
-window.addEventListener('load', () => {
+window.addEventListener('DOMContentLoaded', () => {
   loadSettings();
   loadCategories();
-  updateSettingsUI();
 });
 
 function loadSettings() {
@@ -600,118 +368,91 @@ function loadSettings() {
     const saved = localStorage.getItem(SETTINGS_KEY);
     if (saved) settings = { ...settings, ...JSON.parse(saved) };
   } catch(e) {}
+  document.getElementById('gemini-key').value = settings.geminiKey || '';
+  document.getElementById('gas-url').value    = settings.gasUrl || '';
 }
 
 function saveSettings() {
-  settings.geminiKey = document.getElementById('gemini-key-input').value.trim();
-  settings.gasUrl    = document.getElementById('gas-url-input').value.trim();
+  settings.geminiKey = document.getElementById('gemini-key').value.trim();
+  settings.gasUrl    = document.getElementById('gas-url').value.trim();
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-  updateSettingsUI();
   showToast('設定を保存しました', 'success');
   loadCategories();
 }
 
-function updateSettingsUI() {
-  document.getElementById('gemini-key-input').value = settings.geminiKey || '';
-  document.getElementById('gas-url-input').value    = settings.gasUrl    || '';
-  document.getElementById('sheet-status').textContent =
-    settings.gasUrl ? '設定済み ✅' : '未設定';
-}
-
-// ============================================================
-// ページ切替
-// ============================================================
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(`page-${name}`).classList.add('active');
-  const navBtn = document.getElementById(`nav-${name}`);
-  if (navBtn) navBtn.classList.add('active');
-
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const tab = document.getElementById('tab-' + name);
+  if (tab) tab.classList.add('active');
   if (name === 'history') loadHistory();
   if (name === 'summary') loadSummary();
 }
 
-// ============================================================
-// 画像選択
-// ============================================================
+function openGallery() {
+  const input = document.getElementById('file-input');
+  input.removeAttribute('capture');
+  input.click();
+}
+
 function handleImageSelect(event) {
   const file = event.target.files[0];
   if (!file) return;
-
   const reader = new FileReader();
   reader.onload = (e) => {
-    const base64 = e.target.result;
-    currentImageBase64 = base64.split(',')[1];
-
-    const img = document.getElementById('preview-img');
-    img.src = base64;
-    document.getElementById('capture-zone').classList.add('has-image');
-
-    // 自動解析開始
+    currentImageBase64 = e.target.result.split(',')[1];
+    const zone = document.getElementById('capture-zone');
+    zone.innerHTML = '<img src="' + e.target.result + '" alt="プレビュー">';
+    zone.classList.add('has-image');
     analyzeReceipt();
   };
   reader.readAsDataURL(file);
 }
 
-// ============================================================
-// Gemini APIでレシート解析
-// ============================================================
 async function analyzeReceipt() {
   if (!settings.geminiKey) {
-    showToast('⚙️ まず設定画面でAPIキーを入力してください', 'error');
-    setTimeout(() => showPage('settings'), 500);
+    showToast('⚙️設定でAPIキーを入力してください', 'error');
+    setTimeout(() => showPage('settings'), 800);
     return;
   }
-
-  document.getElementById('analyzing').classList.add('show');
-  document.getElementById('result-area').classList.remove('show');
+  document.getElementById('analyzing').style.display = 'block';
+  document.getElementById('result-area').style.display = 'none';
 
   const prompt = `これからレシート画像を送ります。
-画像内の購入明細を読み取り、各行を下記ルールで家計簿カテゴリに分類してください。
+画像内の購入明細を読み取り、家計簿カテゴリに分類してください。
 
-【出力形式】
-必ずJSON配列のみを出力してください。他のテキストは一切不要です。
-[
-  {
-    "date": "YYYY-MM-DD",
-    "store": "店名",
-    "name": "品目名",
-    "amount": 金額(数値),
-    "large": "費目カテゴリ",
-    "middle": "費目詳細"
-  }
-]
+【出力形式】必ずJSON配列のみを出力。他のテキストは一切不要。
+[{"date":"YYYY-MM-DD","store":"店名","name":"品目","amount":数値,"large":"費目カテゴリ","middle":"費目詳細"}]
 
-【共通ルール】
-- 1行＝1明細（レシート内に複数品目があれば分ける）
-- 同一カテゴリの品目が複数ある場合は合算して「食材一式」等として1行にまとめてもよい
-- 金額は税込の支払額
-- 日付はレシート記載の日付（なければ今日の日付）
-- 合計・小計・税・ポイント・支払方法・お釣りは含めない
-- 割引がある場合、最終支払合計と一致するよう案分して引くこと
+【ルール】
+- 1行=1明細。同一カテゴリは合算可
+- 金額は税込最終支払額
+- 日付はレシート記載のもの
+- 合計・税・ポイント・支払方法は除外
+- 割引は最終支払額に一致するよう案分
 
-【費目カテゴリ → 費目詳細】
-居住費：住宅ローン
-貯蓄・投資：投資、生活防衛費、教育資金、特別費
-固定費：生命・医療保険料、自動車保険料、火災・地震保険料、通信費(携帯)、通信費(ネット)、サブスクリプション費用、ガソリン代、車検・維持費
-変動費：食費(内食費)、中食費、外食費、電気代、ガス代、水道代、日用品・消耗品、美容・理容費、被服費、医療費、交通費、ペット、嗜好品
-教育・養育費：保育料、習い事・教材費、学資保険料、育児用品・雑費
-予備費・小遣い：家族共通、亮太朗、眞衣子、冠婚葬祭・プレゼント・お祝い
-税金等：固定資産税・都市計画税、ふるさと納税、自動車税、自治会費
+【カテゴリ】
+居住費: 住宅ローン
+貯蓄・投資: 投資, 生活防衛費, 教育資金, 特別費
+固定費: 生命・医療保険料, 自動車保険料, 火災・地震保険料, 通信費(携帯), 通信費(ネット), サブスクリプション費用, ガソリン代, 車検・維持費
+変動費: 食費(内食費), 中食費, 外食費, 電気代, ガス代, 水道代, 日用品・消耗品, 美容・理容費, 被服費, 医療費, 交通費, ペット, 嗜好品
+教育・養育費: 保育料, 習い事・教材費, 学資保険料, 育児用品・雑費
+予備費・小遣い: 家族共通, 亮太朗, 眞衣子, 冠婚葬祭・プレゼント・お祝い
+税金等: 固定資産税・都市計画税, ふるさと納税, 自動車税, 自治会費
 
-【優先分類ルール】
-- 肉・野菜・調味料・パン・菓子等の食材は「変動費 / 食費(内食費)」
-- 酒類（ビール・チューハイ等）は「変動費 / 嗜好品」
-- 惣菜・弁当・調理済み食品は「変動費 / 中食費」
-- 宅配ピザ・ファストフード・テイクアウトは「変動費 / 中食費」
-- 店内飲食は「変動費 / 外食費」
-- 医薬品・処方箋は「変動費 / 医療費」
-- オムツ・洗剤・ティッシュ等は「変動費 / 日用品・消耗品」`;
+【優先分類】
+- 肉・野菜・調味料・パン・菓子等の食材→変動費/食費(内食費)
+- 酒類→変動費/嗜好品
+- 惣菜・弁当・調理済→変動費/中食費
+- 宅配ピザ・ファストフード・テイクアウト→変動費/中食費
+- 店内飲食→変動費/外食費
+- 医薬品→変動費/医療費
+- オムツ・洗剤・ティッシュ等→変動費/日用品・消耗品`;
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${settings.geminiKey}`,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + settings.geminiKey,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -725,125 +466,64 @@ async function analyzeReceipt() {
         })
       }
     );
-
     const data = await res.json();
-    console.log('API response:', JSON.stringify(data).substring(0,500));
-    if (data.error) throw new Error('Gemini APIエラー: ' + data.error.message);
+    if (data.error) throw new Error(data.error.message);
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    console.log('text:', text.substring(0,200));
-    if (!text) throw new Error('応答テキストが空 / APIキー確認要');
+    if (!text) throw new Error('Geminiの応答が空');
 
-    // JSON抽出（複数パターン対応）
-    let jsonText = null;
+    let jsonText = text.match(/```json\s*([\s\S]*?)```/)?.[1];
+    if (!jsonText) jsonText = text.match(/```\s*([\s\S]*?)```/)?.[1];
+    if (!jsonText) jsonText = text.match(/\[[\s\S]*\]/)?.[0];
+    if (!jsonText) throw new Error('JSON抽出失敗: ' + text.substring(0,100));
 
-    // パターン1: ```json ... ``` ブロック
-    const codeBlock = text.match(/```json\s*([\s\S]*?)```/);
-    if (codeBlock) jsonText = codeBlock[1].trim();
-
-    // パターン2: ``` ... ``` ブロック
-    if (!jsonText) {
-      const codeBlock2 = text.match(/```\s*([\s\S]*?)```/);
-      if (codeBlock2) jsonText = codeBlock2[1].trim();
-    }
-
-    // パターン3: [ ... ] を直接探す
-    if (!jsonText) {
-      const jsonMatch = text.match(/\[[\s\S]*\]/);
-      if (jsonMatch) jsonText = jsonMatch[0];
-    }
-
-    // パターン4: テキスト全体をそのまま試す
-    if (!jsonText) jsonText = text.trim();
-
-    if (!jsonText) throw new Error('JSONが見つかりません');
-
-    let parsed;
-    try {
-      parsed = JSON.parse(jsonText);
-    } catch(e) {
-      // 末尾のゴミを除去して再試行
-      const cleaned = jsonText.replace(/,\s*([}\]])/g, '$1');
-      parsed = JSON.parse(cleaned);
-    }
-    parsedItems = Array.isArray(parsed) ? parsed : [parsed];
+    parsedItems = JSON.parse(jsonText.trim());
+    if (!Array.isArray(parsedItems)) parsedItems = [parsedItems];
     renderResults();
-
   } catch(err) {
-    showToast('解析失敗
-' + err.message, 'error');
-    console.error(err);
+    showToast('解析失敗\n' + err.message, 'error');
   } finally {
-    document.getElementById('analyzing').classList.remove('show');
+    document.getElementById('analyzing').style.display = 'none';
   }
 }
 
-// ============================================================
-// 解析結果の表示
-// ============================================================
 function renderResults() {
   const container = document.getElementById('result-items');
-  container.innerHTML = '';
-
   let total = 0;
-  parsedItems.forEach((item, i) => {
+  container.innerHTML = parsedItems.map((item, i) => {
     total += Number(item.amount) || 0;
-    const div = document.createElement('div');
-    div.className = 'result-item';
-    div.onclick = () => openEditModal(i);
-    div.innerHTML = `
-      <div class="result-item-header">
-        <div class="result-item-name">${item.name || item.store || '不明'}</div>
-        <div class="result-item-amount">¥${Number(item.amount).toLocaleString()}</div>
+    return `<div class="item" onclick="openEdit(${i})">
+      <div class="item-top">
+        <div class="item-name">${item.name || item.store || '不明'}</div>
+        <div class="item-amount">¥${Number(item.amount).toLocaleString()}</div>
       </div>
-      <div class="result-item-cats">
-        <span class="cat-tag large">${item.large || '未分類'}</span>
-        <span class="cat-tag">${item.middle || '未分類'}</span>
-        ${item.date ? `<span class="cat-tag">${item.date}</span>` : ''}
-      </div>
-    `;
-    container.appendChild(div);
-  });
-
-  document.getElementById('result-total').textContent = `¥${total.toLocaleString()}`;
-  document.getElementById('result-area').classList.add('show');
+      <div class="item-cats">${item.large || '?'} › ${item.middle || '?'} ${item.date ? '・' + item.date : ''}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('result-total').textContent = '¥' + total.toLocaleString();
+  document.getElementById('result-area').style.display = 'block';
 }
 
-// ============================================================
-// 編集モーダル
-// ============================================================
-function openEditModal(index) {
-  const item = parsedItems[index];
-  document.getElementById('edit-index').value  = index;
-  document.getElementById('edit-date').value   = item.date   || '';
-  document.getElementById('edit-name').value   = item.name   || item.store || '';
+function openEdit(i) {
+  const item = parsedItems[i];
+  document.getElementById('edit-index').value = i;
+  document.getElementById('edit-date').value = item.date || '';
+  document.getElementById('edit-name').value = item.name || item.store || '';
   document.getElementById('edit-amount').value = item.amount || '';
 
-  // カテゴリセレクト構築
-  buildLargeSelect(item.large);
-  buildMiddleSelect(item.large, item.middle);
-
+  const larges = [...new Set(categories.map(c => c.large))];
+  document.getElementById('edit-large').innerHTML = larges.map(l =>
+    `<option ${l === item.large ? 'selected' : ''}>${l}</option>`
+  ).join('');
+  updateMiddle(item.middle);
   document.getElementById('edit-modal').classList.add('show');
 }
 
-function buildLargeSelect(selected) {
-  const largeSet = [...new Set(categories.map(c => c.large))];
-  const sel = document.getElementById('edit-large');
-  sel.innerHTML = largeSet.map(l =>
-    `<option value="${l}" ${l === selected ? 'selected' : ''}>${l}</option>`
-  ).join('');
-}
-
-function buildMiddleSelect(large, selected) {
-  const middles = categories.filter(c => c.large === large).map(c => c.middle);
-  const sel = document.getElementById('edit-middle');
-  sel.innerHTML = middles.map(m =>
-    `<option value="${m}" ${m === selected ? 'selected' : ''}>${m}</option>`
-  ).join('');
-}
-
-function updateMiddleOptions() {
+function updateMiddle(selected) {
   const large = document.getElementById('edit-large').value;
-  buildMiddleSelect(large, '');
+  const middles = categories.filter(c => c.large === large).map(c => c.middle);
+  document.getElementById('edit-middle').innerHTML = middles.map(m =>
+    `<option ${m === selected ? 'selected' : ''}>${m}</option>`
+  ).join('');
 }
 
 function saveEdit() {
@@ -857,37 +537,23 @@ function saveEdit() {
   renderResults();
 }
 
-function closeModal(event) {
-  if (event && event.target !== document.getElementById('edit-modal')) return;
+function closeModal() {
   document.getElementById('edit-modal').classList.remove('show');
 }
 
-// ============================================================
-// Google Sheetsに送信
-// ============================================================
 async function sendToSheets() {
-  if (!settings.gasUrl) {
-    showToast('Apps Script URLを設定してください', 'error');
-    showPage('settings');
-    return;
-  }
-  if (parsedItems.length === 0) {
-    showToast('送信するデータがありません', 'error');
-    return;
-  }
-
+  if (!settings.gasUrl) { showToast('Apps Script URLを設定してください', 'error'); return; }
+  if (parsedItems.length === 0) return;
   const btn = document.querySelector('#result-area .btn-primary');
   btn.disabled = true;
   btn.textContent = '送信中...';
-
   const items = parsedItems.map(item => ({
-    date:     item.date     || '',
-    category: item.large    || '',
-    detail:   item.middle   || '',
-    amount:   item.amount   || 0,
-    store:    item.store    || ''
+    date: item.date || '',
+    category: item.large || '',
+    detail: item.middle || '',
+    amount: item.amount || 0,
+    store: item.store || ''
   }));
-
   try {
     await fetch(settings.gasUrl, {
       method: 'POST',
@@ -895,10 +561,8 @@ async function sendToSheets() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'addItems', items })
     });
-
-    showToast(`${items.length}件を送信しました！`, 'success');
+    showToast(items.length + '件を送信しました！', 'success');
     setTimeout(() => resetCapture(), 1500);
-
   } catch(err) {
     showToast('送信失敗: ' + err.message, 'error');
   } finally {
@@ -907,50 +571,37 @@ async function sendToSheets() {
   }
 }
 
-// ============================================================
-// カテゴリ読み込み
-// ============================================================
 async function loadCategories() {
   if (!settings.gasUrl) return;
   try {
-    const res = await fetch(`${settings.gasUrl}?action=getCategories`);
+    const res = await fetch(settings.gasUrl + '?action=getCategories');
     const data = await res.json();
     if (data.success) categories = data.categories;
   } catch(e) {
-    // フォールバック：ハードコードされたカテゴリ
     categories = [
-      {large:'居住費',middle:'住宅ローン'},
-      {large:'貯蓄・投資',middle:'投資'},{large:'貯蓄・投資',middle:'生活防衛費'},
-      {large:'固定費',middle:'通信費(携帯)'},{large:'固定費',middle:'ガソリン代'},
-      {large:'変動費',middle:'食費(内食費)'},{large:'変動費',middle:'中食費'},
-      {large:'変動費',middle:'外食費'},{large:'変動費',middle:'日用品・消耗品'},
-      {large:'変動費',middle:'医療費'},{large:'変動費',middle:'嗜好品'},
-      {large:'教育・養育費',middle:'保育料'},
-      {large:'予備費・小遣い',middle:'家族共通'},{large:'予備費・小遣い',middle:'亮太朗'},
-      {large:'税金等',middle:'固定資産税・都市計画税'},
+      {large:'変動費',middle:'食費(内食費)'},
+      {large:'変動費',middle:'中食費'},
+      {large:'変動費',middle:'外食費'},
+      {large:'変動費',middle:'日用品・消耗品'},
+      {large:'変動費',middle:'嗜好品'},
     ];
   }
 }
 
-// ============================================================
-// 履歴読み込み
-// ============================================================
 async function loadHistory() {
-  if (!settings.gasUrl) {
-    document.getElementById('history-list').innerHTML = '<div class="empty-state">Apps Script URLを設定してください</div>';
-    return;
-  }
-  document.getElementById('history-list').innerHTML = '<div class="empty-state">読み込み中...</div>';
+  const list = document.getElementById('history-list');
+  if (!settings.gasUrl) { list.innerHTML = '<div class="empty">設定が必要です</div>'; return; }
+  list.innerHTML = '<div class="empty">読み込み中...</div>';
   try {
-    const res  = await fetch(`${settings.gasUrl}?action=getRecentItems&limit=50`);
+    const res = await fetch(settings.gasUrl + '?action=getRecentItems&limit=50');
     const data = await res.json();
     if (!data.success || data.items.length === 0) {
-      document.getElementById('history-list').innerHTML = '<div class="empty-state">まだ記録がありません</div>';
+      list.innerHTML = '<div class="empty">まだ記録がありません</div>';
       return;
     }
-    document.getElementById('history-list').innerHTML = data.items.map(item => `
+    list.innerHTML = data.items.map(item => `
       <div class="history-item">
-        <div class="history-left">
+        <div>
           <div class="history-name">${item.detail || item.category}</div>
           <div class="history-cat">${item.category} › ${item.detail}</div>
         </div>
@@ -961,84 +612,58 @@ async function loadHistory() {
       </div>
     `).join('');
   } catch(e) {
-    document.getElementById('history-list').innerHTML = '<div class="empty-state">読み込みに失敗しました</div>';
+    list.innerHTML = '<div class="empty">読み込み失敗</div>';
   }
 }
 
-// ============================================================
-// 月次サマリー
-// ============================================================
 async function loadSummary() {
-  const now   = new Date();
-  const year  = now.getFullYear();
-  const month = now.getMonth() + 1;
-
-  document.getElementById('summary-month').textContent = `${year}年${month}月`;
-
-  if (!settings.gasUrl) {
-    document.getElementById('summary-bars').innerHTML = '<div class="empty-state">Apps Script URLを設定してください</div>';
-    return;
-  }
-
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth() + 1;
+  document.getElementById('summary-month').textContent = y + '年' + m + '月の支出';
+  const bars = document.getElementById('summary-bars');
+  if (!settings.gasUrl) { bars.innerHTML = '<div class="empty">設定が必要です</div>'; return; }
   try {
-    const res  = await fetch(`${settings.gasUrl}?action=getMonthlySummary&year=${year}&month=${month}`);
+    const res = await fetch(settings.gasUrl + '?action=getMonthlySummary&year=' + y + '&month=' + m);
     const data = await res.json();
-
     if (!data.success || data.summary.length === 0) {
       document.getElementById('summary-total').textContent = '¥0';
-      document.getElementById('summary-bars').innerHTML = '<div class="empty-state">今月のデータがありません</div>';
+      bars.innerHTML = '<div class="empty">今月のデータがありません</div>';
       return;
     }
-
-    // 大カテゴリ別に集計
     const byLarge = {};
     let total = 0;
     data.summary.forEach(row => {
       byLarge[row.large] = (byLarge[row.large] || 0) + row.amount;
       total += row.amount;
     });
-
-    document.getElementById('summary-total').textContent = `¥${total.toLocaleString()}`;
-
-    const sorted = Object.entries(byLarge).sort((a,b) => b[1] - a[1]);
-    document.getElementById('summary-bars').innerHTML = sorted.map(([cat, amt]) => `
+    document.getElementById('summary-total').textContent = '¥' + total.toLocaleString();
+    bars.innerHTML = Object.entries(byLarge).sort((a,b) => b[1]-a[1]).map(([cat, amt]) => `
       <div class="bar-item">
-        <div class="bar-header">
-          <span>${cat}</span>
-          <span>¥${amt.toLocaleString()}</span>
-        </div>
-        <div class="bar-track">
-          <div class="bar-fill" style="width:${Math.round(amt/total*100)}%"></div>
-        </div>
+        <div class="bar-header"><span>${cat}</span><span>¥${amt.toLocaleString()}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.round(amt/total*100)}%"></div></div>
       </div>
     `).join('');
-
   } catch(e) {
-    document.getElementById('summary-bars').innerHTML = '<div class="empty-state">読み込みに失敗しました</div>';
+    bars.innerHTML = '<div class="empty">読み込み失敗</div>';
   }
 }
 
-// ============================================================
-// リセット
-// ============================================================
 function resetCapture() {
   parsedItems = [];
   currentImageBase64 = '';
-  document.getElementById('preview-img').src = '';
-  document.getElementById('capture-zone').classList.remove('has-image');
-  document.getElementById('result-area').classList.remove('show');
-  document.getElementById('analyzing').classList.remove('show');
+  document.getElementById('result-area').style.display = 'none';
+  document.getElementById('analyzing').style.display = 'none';
   document.getElementById('file-input').value = '';
+  const zone = document.getElementById('capture-zone');
+  zone.classList.remove('has-image');
+  zone.innerHTML = '<div class="icon">📷</div><div>タップしてレシートを撮影</div><div style="font-size:12px;margin-top:6px">または画像を選択</div>';
 }
 
-// ============================================================
-// トースト通知
-// ============================================================
-function showToast(msg, type = '') {
+function showToast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = `toast ${type} show`;
-  setTimeout(() => t.classList.remove('show'), 3000);
+  t.className = 'toast ' + (type || '') + ' show';
+  setTimeout(() => t.classList.remove('show'), 3500);
 }
 </script>
 </body>
