@@ -96,7 +96,7 @@
 
   /* ===== メインコンテンツ ===== */
   .main {
-    padding: 120px 16px 24px;
+    padding: 16px 16px 24px;
   }
 
   /* ===== ページ ===== */
@@ -594,6 +594,16 @@ let currentImageBase64 = '';
 // 初期化
 // ============================================================
 window.addEventListener('load', () => {
+  // ヘッダーの高さに合わせてmainのtop paddingを調整
+  function adjustLayout() {
+    const header = document.querySelector('.header');
+    const main = document.querySelector('.main');
+    if (header && main) {
+      main.style.paddingTop = (header.offsetHeight + 8) + 'px';
+    }
+  }
+  adjustLayout();
+  window.addEventListener('resize', adjustLayout);
   loadSettings();
   loadCategories();
   updateSettingsUI();
