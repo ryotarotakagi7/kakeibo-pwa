@@ -572,8 +572,8 @@
 const SETTINGS_KEY = 'kakeibo_settings';
 
 let settings = {
-  geminiKey: '',
-  gasUrl: ''
+  geminiKey: 'AIzaSyB0OV2geoX0PCemvS4i_cSf_bLkLWgTA78',
+  gasUrl: 'https://script.google.com/macros/s/AKfycbxPqYb88G3VlfJvPru119Hqs_ilaW01hVaH5clO9BYr5mx2V-_ZD8-zFmU8ym4x53IG/exec'
 };
 
 let categories = [];  // [{large, middle}]
@@ -723,11 +723,39 @@ async function analyzeReceipt() {
     const data = await res.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-    // JSON抽出
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) throw new Error('JSONが見つかりません');
+    // JSON抽出（複数パターン対応）
+    let jsonText = null;
 
-    parsedItems = JSON.parse(jsonMatch[0]);
+    // パターン1: ```json ... ``` ブロック
+    const codeBlock = text.match(/```json\s*([\s\S]*?)```/);
+    if (codeBlock) jsonText = codeBlock[1].trim();
+
+    // パターン2: ``` ... ``` ブロック
+    if (!jsonText) {
+      const codeBlock2 = text.match(/```\s*([\s\S]*?)```/);
+      if (codeBlock2) jsonText = codeBlock2[1].trim();
+    }
+
+    // パターン3: [ ... ] を直接探す
+    if (!jsonText) {
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      if (jsonMatch) jsonText = jsonMatch[0];
+    }
+
+    // パターン4: テキスト全体をそのまま試す
+    if (!jsonText) jsonText = text.trim();
+
+    if (!jsonText) throw new Error('JSONが見つかりません');
+
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonText);
+    } catch(e) {
+      // 末尾のゴミを除去して再試行
+      const cleaned = jsonText.replace(/,\s*([}\]])/g, '$1');
+      parsed = JSON.parse(cleaned);
+    }
+    parsedItems = Array.isArray(parsed) ? parsed : [parsed];
     renderResults();
 
   } catch(err) {
